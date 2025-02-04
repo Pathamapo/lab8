@@ -30,14 +30,14 @@ class BlogManager {
     constructor() {
         this.blogs = this.loadFromLocalStorage();
     }
-    addBlog(title, content, tags) {
+    addBlog(title, content, tags) { //เพิ่มบล็อกใหม่
         const blog = new Blog(Date.now(), title, content, tags);
         this.blogs.push(blog);
         this.sortBlogs();
         this.saveToLocalStorage();
         return blog;
     }
-    updateBlog(id, title, content, tags) {
+    updateBlog(id, title, content, tags) { //อัทเดทบล็อก
         const blog = this.getBlog(id);
         if (blog) {
             blog.update(title, content, tags);
@@ -56,10 +56,10 @@ class BlogManager {
     sortBlogs() {
         this.blogs.sort((a, b) => b.updatedDate - a.updatedDate);
     }
-    saveToLocalStorage() {
+    saveToLocalStorage() {  //บันทึกข้อมูลลงlocalStorage
         localStorage.setItem("blogs", JSON.stringify(this.blogs));
     }
-    loadFromLocalStorage() {
+    loadFromLocalStorage() { //โหลดข้อมูลlocalStorage
         const data = localStorage.getItem("blogs");
         return data ? JSON.parse(data).map(b => new Blog(b.id, b.title, b.content, b.tags.join(", "))) : [];
     }
@@ -96,7 +96,7 @@ class BlogUI {
             this.render(this.tagFilterInput.value.trim());
         });
     }
-    handleSubmit() {
+    handleSubmit() { //เพิ่มบล๊อก
         const title = this.titleInput.value.trim();
         const content = this.contentInput.value.trim();
         const tags = this.tagsInput.value.trim();
@@ -112,7 +112,7 @@ class BlogUI {
             this.render();
         }
     }
-    editBlog(id) {
+    editBlog(id) { //แก้ไขบล็อก
         const blog = this.blogManager.getBlog(id);
         if (blog) {
             this.titleInput.value = blog.title;
@@ -153,6 +153,6 @@ class BlogUI {
     }
 }
 
-// เริ่มต้นใช้งาน
+//สร้าง instance และ เริ่มต้นใช้งาน
 const blogManager = new BlogManager();
 const blogUI = new BlogUI(blogManager);
