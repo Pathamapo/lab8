@@ -81,25 +81,25 @@ class BlogUI {
         this.editIdInput = document.getElementById("edit-id");
         this.cancelBtn = document.getElementById("cancel-btn");
         this.blogList = document.getElementById("blog-list");
-        this.tagFilterInput = document.getElementById("tag-filter");
-        this.filterBtn = document.getElementById("filter-btn");
+        this.tagFilterInput = document.getElementById("tag-filter"); //tag
+        this.filterBtn = document.getElementById("filter-btn"); //กรอง
     }
     initEventListeners() {
-        this.form.addEventListener("submit", (e) => {
+        this.form.addEventListener("submit", (e) => { //จัดการการ submit form
             e.preventDefault();
             this.handleSubmit();
         });
-        this.cancelBtn.addEventListener("click", () => {
+        this.cancelBtn.addEventListener("click", () => { //จัดการปุ่มยกเลิก
             this.resetForm();
         });
-        this.filterBtn.addEventListener("click", () => {
+        this.filterBtn.addEventListener("click", () => { //ปุ่มกรอง
             this.render(this.tagFilterInput.value.trim());
         });
     }
     handleSubmit() { //เพิ่มบล๊อก
         const title = this.titleInput.value.trim();
         const content = this.contentInput.value.trim();
-        const tags = this.tagsInput.value.trim();
+        const tags = this.tagsInput.value.trim(); //เพิ่ม tag
         const editId = parseInt(this.editIdInput.value);
 
         if (title && content) {
@@ -119,6 +119,7 @@ class BlogUI {
             this.contentInput.value = blog.content;
             this.tagsInput.value = blog.tags.join(", ");
             this.editIdInput.value = blog.id;
+            this.formTitle.textContent = "แก้ไขบล็อก";
             this.cancelBtn.classList.remove("hidden");
             window.scrollTo(0, 0);
         }
@@ -132,6 +133,7 @@ class BlogUI {
     resetForm() {
         this.form.reset();
         this.editIdInput.value = "";
+        this.formTitle.textContent = "เขียนบล็อกใหม่";
         this.cancelBtn.classList.add("hidden");
     }
     render(filterTag = "") {
