@@ -37,7 +37,7 @@ class BlogManager {
         this.saveToLocalStorage();
         return blog;
     }
-    updateBlog(id, title, content, tags) { //อัทเดทบล็อก
+    updateBlog(id, title, content, tags) { //อัปเดตบล็อก
         const blog = this.getBlog(id);
         if (blog) {
             blog.update(title, content, tags);
@@ -96,7 +96,7 @@ class BlogUI {
             this.render(this.tagFilterInput.value.trim());
         });
     }
-    handleSubmit() { //เพิ่มบล๊อก
+    handleSubmit() { //เพิ่ม/แก้ไขบล็อก
         const title = this.titleInput.value.trim();
         const content = this.contentInput.value.trim();
         const tags = this.tagsInput.value.trim(); //เพิ่ม tag
@@ -104,12 +104,15 @@ class BlogUI {
 
         if (title && content) {
             if (editId) {
-                this.blogManager.updateBlog(editId, title, content, tags);
+                const updatedBlog = this.blogManager.updateBlog(editId, title, content, tags);
+                if (updatedBlog) {
+                    this.updateBlogUI(updatedBlog);
+                }
             } else {
-                this.blogManager.addBlog(title, content, tags);
+                const newBlog = this.blogManager.addBlog(title, content, tags);
+                this.addBlogToUI(newBlog);
             }
             this.resetForm();
-            this.render();
         }
     }
     editBlog(id) { //แก้ไขบล็อก
@@ -119,7 +122,6 @@ class BlogUI {
             this.contentInput.value = blog.content;
             this.tagsInput.value = blog.tags.join(", ");
             this.editIdInput.value = blog.id;
-            this.formTitle.textContent = "แก้ไขบล็อก";
             this.cancelBtn.classList.remove("hidden");
             window.scrollTo(0, 0);
         }
@@ -127,30 +129,41 @@ class BlogUI {
     deleteBlog(id) {
         if (confirm("ต้องการลบบล็อกนี้ใช่หรือไม่?")) {
             this.blogManager.deleteBlog(id);
-            this.render();
+            document.getElementById(`blog-${id}`).remove();
         }
     }
     resetForm() {
         this.form.reset();
         this.editIdInput.value = "";
-        this.formTitle.textContent = "เขียนบล็อกใหม่";
         this.cancelBtn.classList.add("hidden");
+    }
+    addBlogToUI(blog) {
+        const blogHTML = this.createBlogHTML(blog);
+        this.blogList.insertAdjacentHTML("afterbegin", blogHTML);
+    }
+    updateBlogUI(blog) {
+        const blogElement = document.getElementById(`blog-${blog.id}`);
+        if (blogElement) {
+            blogElement.outerHTML = this.createBlogHTML(blog);
+        }
+    }
+    createBlogHTML(blog) {
+        return `
+            <div class="blog-post" id="blog-${blog.id}">
+                <h2 class="blog-title">${blog.title}</h2>
+                <div class="blog-date">อัปเดตเมื่อ: ${blog.getFormattedDate()}</div>
+                <div class="blog-content">${blog.content.replace(/\n/g, "<br>")}</div>
+                <div class="blog-tags"><strong>แท็ก:</strong> ${blog.tags.join(", ")}</div>
+                <div class="blog-actions">
+                    <button class="btn-edit" onclick="blogUI.editBlog(${blog.id})">แก้ไข</button>
+                    <button class="btn-delete" onclick="blogUI.deleteBlog(${blog.id})">ลบ</button>
+                </div>
+            </div>`;
     }
     render(filterTag = "") {
         this.blogList.innerHTML = this.blogManager.blogs
             .filter(blog => filterTag === "" || blog.tags.includes(filterTag))
-            .map(blog => `
-                <div class="blog-post">
-                    <h2 class="blog-title">${blog.title}</h2>
-                    <div class="blog-date">อัปเดตเมื่อ: ${blog.getFormattedDate()}</div>
-                    <div class="blog-content">${blog.content.replace(/\n/g, "<br>")}</div>
-                    <div class="blog-tags"><strong>แท็ก:</strong> ${blog.tags.join(", ")}</div>
-                    <div class="blog-actions">
-                        <button class="btn-edit" onclick="blogUI.editBlog(${blog.id})">แก้ไข</button>
-                        <button class="btn-delete" onclick="blogUI.deleteBlog(${blog.id})">ลบ</button>
-                    </div>
-                </div>
-            `)
+            .map(blog => this.createBlogHTML(blog))
             .join("");
     }
 }
